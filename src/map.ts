@@ -1,13 +1,24 @@
 import L from "leaflet";
-import type { Map as LeafletMap, LayerGroup, LatLngExpression } from "leaflet";
+import type {
+  Map as LeafletMap,
+  LayerGroup,
+  CircleMarker,
+  LatLngExpression,
+  LeafletMouseEvent,
+} from "leaflet";
 import "leaflet/dist/leaflet.css";
 import type { GpxData, TrackPoint } from "./converter";
 
 const TRACK_COLOR = "#0d6e56";
 const ROUTE_COLOR = "#1a6f9b";
+const SCRUB_COLOR = "#c45c26";
+
+export type MapClickHandler = (lat: number, lon: number) => void;
 
 let map: LeafletMap | null = null;
 let overlay: LayerGroup | null = null;
+let scrubMarker: CircleMarker | null = null;
+let mapClickHandler: MapClickHandler | null = null;
 
 function ensureMap(container: HTMLElement): LeafletMap {
   if (map) return map;
@@ -24,6 +35,11 @@ function ensureMap(container: HTMLElement): LeafletMap {
   }).addTo(map);
 
   overlay = L.layerGroup().addTo(map);
+
+  map.on("click", (e: LeafletMouseEvent) => {
+    mapClickHandler?.(e.latlng.lat, e.latlng.lng);
+  });
+
   return map;
 }
 
@@ -31,14 +47,44 @@ function toLatLngs(points: TrackPoint[]): LatLngExpression[] {
   return points.map((p) => [p.lat, p.lon]);
 }
 
+export function setMapClickHandler(handler: MapClickHandler | null): void {
+  mapClickHandler = handler;
+}
+
+export function clearScrubMarker(): void {
+  if (scrubMarker && map) {
+    map.removeLayer(scrubMarker);
+  }
+  scrubMarker = null;
+}
+
+export function setScrubMarker(lat: number, lon: number): void {
+  if (!map) return;
+  if (!scrubMarker) {
+    scrubMarker = L.circleMarker([lat, lon], {
+      radius: 8,
+      color: "#fff",
+      fillColor: SCRUB_COLOR,
+      fillOpacity: 1,
+      weight: 2,
+      pane: "markerPane",
+    }).addTo(map);
+  } else {
+    scrubMarker.setLatLng([lat, lon]);
+  }
+}
+
 export function clearPreview(container: HTMLElement): void {
   container.hidden = true;
+  clearScrubMarker();
   overlay?.clearLayers();
+  mapClickHandler = null;
 }
 
 export function showPreview(container: HTMLElement, data: GpxData): void {
   container.hidden = false;
   const leafletMap = ensureMap(container);
+  clearScrubMarker();
   overlay?.clearLayers();
 
   const bounds = L.latLngBounds([]);

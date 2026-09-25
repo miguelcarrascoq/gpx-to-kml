@@ -233,6 +233,110 @@ body {
   font: inherit;
 }
 
+.elevation {
+  margin-top: 1.25rem;
+}
+
+.elevation-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.75rem 1.25rem;
+  margin-bottom: 0.5rem;
+}
+
+.elevation-header .meta-heading {
+  margin-bottom: 0;
+}
+
+.elevation-readouts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1.25rem;
+}
+
+.readout {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  min-width: 4.5rem;
+}
+
+.readout-label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.readout-value {
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  font-size: 0.98rem;
+}
+
+.elevation-empty {
+  margin: 0.5rem 0 0;
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+
+.elevation-chart {
+  height: 160px;
+  width: 100%;
+  border-radius: var(--radius);
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.65);
+  overflow: hidden;
+}
+
+.elevation-svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  touch-action: none;
+}
+
+.elevation-grid {
+  stroke: var(--line);
+  stroke-width: 1;
+}
+
+.elevation-axis {
+  fill: var(--muted);
+  font-size: 11px;
+  font-family: var(--font-body);
+}
+
+.elevation-line {
+  stroke: var(--accent);
+  stroke-width: 2.25;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+
+.elevation-cursor {
+  stroke: #c45c26;
+  stroke-width: 1.5;
+  stroke-dasharray: 4 3;
+  pointer-events: none;
+}
+
+.elevation-dot {
+  fill: #c45c26;
+  stroke: #fff;
+  stroke-width: 2;
+  pointer-events: none;
+}
+
+.elevation-hint {
+  margin: 0.5rem 0 0;
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
 .error {
   margin-top: 1rem;
   color: var(--danger);

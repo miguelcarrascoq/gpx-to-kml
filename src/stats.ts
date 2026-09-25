@@ -33,7 +33,10 @@ export interface OutputFileStats {
 }
 
 export interface ProfileSample {
+  /** Index within the elevation sample series (0..n-1). */
   index: number;
+  /** Index within flattenPathPoints(data). */
+  pathIndex: number;
   point: TrackPoint;
   distanceM: number;
   ele: number;
@@ -195,6 +198,7 @@ export function buildProfileSamples(data: GpxData): ProfileSample[] {
     if (p.ele == null || !Number.isFinite(p.ele)) continue;
     samples.push({
       index: sampleIndex++,
+      pathIndex: i,
       point: p,
       distanceM,
       ele: p.ele,
@@ -220,6 +224,25 @@ export function nearestPathIndex(
     if (d < bestD) {
       bestD = d;
       best = i;
+    }
+  }
+  return best;
+}
+
+/** Profile sample whose pathIndex is closest to the given path index. */
+export function nearestSampleByPathIndex(
+  samples: ProfileSample[],
+  pathIndex: number
+): ProfileSample | null {
+  if (!samples.length) return null;
+  let best = samples[0];
+  let bestDelta = Math.abs(best.pathIndex - pathIndex);
+  for (let i = 1; i < samples.length; i++) {
+    const s = samples[i];
+    const delta = Math.abs(s.pathIndex - pathIndex);
+    if (delta < bestDelta) {
+      best = s;
+      bestDelta = delta;
     }
   }
   return best;

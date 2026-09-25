@@ -71,6 +71,38 @@
         aria-label="Track map preview"
       ></div>
 
+      <section class="elevation" id="elevation" hidden>
+        <div class="elevation-header">
+          <h2 class="meta-heading">Elevation</h2>
+          <div class="elevation-readouts" aria-live="polite">
+            <div class="readout">
+              <span class="readout-label">Distance</span>
+              <span class="readout-value" data-readout-distance>—</span>
+            </div>
+            <div class="readout">
+              <span class="readout-label">Altitude</span>
+              <span class="readout-value" data-readout-elevation>—</span>
+            </div>
+            <div class="readout">
+              <span class="readout-label">Time</span>
+              <span class="readout-value" data-readout-time>—</span>
+            </div>
+          </div>
+        </div>
+        <p class="elevation-empty" data-elevation-empty hidden>
+          No elevation data in this file. Scrubbing the map is unavailable.
+        </p>
+        <div
+          class="elevation-chart"
+          data-elevation-chart
+          role="region"
+          aria-label="Elevation profile"
+        ></div>
+        <p class="elevation-hint">
+          Drag the profile or click the map to pick a position along the track.
+        </p>
+      </section>
+
       <p class="error" id="error" hidden></p>
     </main>
 

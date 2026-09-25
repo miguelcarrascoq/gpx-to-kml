@@ -1,14 +1,26 @@
+import type { GpxData } from "./converter";
 import { gpxToKml } from "./converter";
-import { clearPreview, showPreview } from "./map";
+import { ElevationProfile } from "./elevation";
+import {
+  clearPreview,
+  clearScrubMarker,
+  setMapClickHandler,
+  setScrubMarker,
+  showPreview,
+} from "./map";
 import {
   buildInputStats,
   buildOutputStats,
+  buildProfileSamples,
   formatBytes,
   formatDistance,
   formatDuration,
   formatElevation,
+  nearestPathIndex,
+  nearestSampleByPathIndex,
   type InputFileStats,
   type OutputFileStats,
+  type ProfileSample,
 } from "./stats";
 import "./styles.css";
 
@@ -20,9 +32,14 @@ const outputStatsEl = document.getElementById("outputStats") as HTMLElement;
 const downloadBtn = document.getElementById("downloadBtn") as HTMLButtonElement;
 const errorEl = document.getElementById("error") as HTMLElement;
 const mapEl = document.getElementById("map") as HTMLElement;
+const elevationEl = document.getElementById("elevation") as HTMLElement;
+
+const elevationProfile = new ElevationProfile(elevationEl);
 
 let lastKml: string | null = null;
 let lastName = "track.kml";
+let lastData: GpxData | null = null;
+let lastSamples: ProfileSample[] = [];
 
 function showError(message: string): void {
   errorEl.hidden = !message;
@@ -53,25 +70,13 @@ function renderInputStats(stats: InputFileStats): void {
     stats.pointCount.toLocaleString("en")
   );
   if (stats.trackCount) {
-    appendStat(
-      inputStatsEl,
-      "Tracks",
-      String(stats.trackCount)
-    );
+    appendStat(inputStatsEl, "Tracks", String(stats.trackCount));
   }
   if (stats.routeCount) {
-    appendStat(
-      inputStatsEl,
-      "Routes",
-      String(stats.routeCount)
-    );
+    appendStat(inputStatsEl, "Routes", String(stats.routeCount));
   }
   if (stats.waypointCount) {
-    appendStat(
-      inputStatsEl,
-      "Waypoints",
-      String(stats.waypointCount)
-    );
+    appendStat(inputStatsEl, "Waypoints", String(stats.waypointCount));
   }
   const m = stats.metrics;
   if (m.distanceM > 0) {
@@ -113,6 +118,23 @@ function showResults(input: InputFileStats, output: OutputFileStats): void {
   resultsEl.hidden = false;
 }
 
+function onProfileScrub(sample: ProfileSample | null): void {
+  if (!sample) {
+    clearScrubMarker();
+    return;
+  }
+  setScrubMarker(sample.point.lat, sample.point.lon);
+}
+
+function onMapClick(lat: number, lon: number): void {
+  if (!lastData || !lastSamples.length) return;
+  const pathIndex = nearestPathIndex(lastData, lat, lon);
+  const sample = nearestSampleByPathIndex(lastSamples, pathIndex);
+  if (!sample) return;
+  elevationProfile.setActiveSample(sample);
+  setScrubMarker(sample.point.lat, sample.point.lon);
+}
+
 function baseName(filename: string): string {
   return filename.replace(/\.gpx$/i, "") || "track";
 }
@@ -121,7 +143,10 @@ async function handleFile(file: File | undefined | null): Promise<void> {
   showError("");
   clearResults();
   clearPreview(mapEl);
+  elevationProfile.clear();
   lastKml = null;
+  lastData = null;
+  lastSamples = [];
 
   if (!file) return;
 
@@ -138,11 +163,21 @@ async function handleFile(file: File | undefined | null): Promise<void> {
     const { kml, data } = gpxToKml(text);
     lastKml = kml;
     lastName = `${baseName(file.name)}.kml`;
+    lastData = data;
 
     const input = buildInputStats(file, data);
     const output = buildOutputStats(lastName, kml, data);
     showResults(input, output);
     showPreview(mapEl, data);
+
+    lastSamples = buildProfileSamples(data);
+    elevationProfile.setOnScrub(onProfileScrub);
+    elevationProfile.show(lastSamples);
+    if (lastSamples.length) {
+      setMapClickHandler(onMapClick);
+    } else {
+      setMapClickHandler(null);
+    }
   } catch (err) {
     const message =
       err instanceof Error ? err.message : "Could not convert the file";
