@@ -10,7 +10,7 @@ import {
 
 export type ScrubHandler = (sample: ProfileSample | null) => void;
 
-const PAD = { top: 16, right: 12, bottom: 28, left: 44 };
+const PAD = { top: 12, right: 10, bottom: 22, left: 40 };
 
 export class ElevationProfile {
   private readonly root: HTMLElement;

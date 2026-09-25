@@ -19,6 +19,7 @@ let map: LeafletMap | null = null;
 let overlay: LayerGroup | null = null;
 let scrubMarker: CircleMarker | null = null;
 let mapClickHandler: MapClickHandler | null = null;
+let sizeObserver: ResizeObserver | null = null;
 
 function ensureMap(container: HTMLElement): LeafletMap {
   if (map) return map;
@@ -40,8 +41,13 @@ function ensureMap(container: HTMLElement): LeafletMap {
     mapClickHandler?.(e.latlng.lat, e.latlng.lng);
   });
 
+  sizeObserver = new ResizeObserver(() => {
+    map?.invalidateSize({ animate: false });
+  });
+  sizeObserver.observe(container);
+
   window.addEventListener("resize", () => {
-    map?.invalidateSize();
+    map?.invalidateSize({ animate: false });
   });
 
   return map;
