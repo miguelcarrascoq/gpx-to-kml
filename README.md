@@ -12,13 +12,16 @@ Compatible con tracks de Insta360 Studio, Garmin y otros exportadores GPX 1.0/1.
 
 ## Local
 
-Sirve la carpeta con cualquier servidor estático, por ejemplo:
-
 ```bash
-python3 -m http.server 8080
+npm install
+npm run dev
 ```
 
-Abre `http://localhost:8080`.
+Abre la URL que muestre Vite (por defecto `http://localhost:5173/gpx-to-kml/`).
+
+```bash
+npm run build
+```
 
 ## Licencia
 

@@ -1,31 +1,32 @@
-import { gpxToKml } from "./converter.js";
+import { gpxToKml } from "./converter";
+import "./styles.css";
 
-const dropzone = document.getElementById("dropzone");
-const fileInput = document.getElementById("fileInput");
-const statusEl = document.getElementById("status");
-const statusText = document.getElementById("statusText");
-const downloadBtn = document.getElementById("downloadBtn");
-const errorEl = document.getElementById("error");
+const dropzone = document.getElementById("dropzone") as HTMLElement;
+const fileInput = document.getElementById("fileInput") as HTMLInputElement;
+const statusEl = document.getElementById("status") as HTMLElement;
+const statusText = document.getElementById("statusText") as HTMLElement;
+const downloadBtn = document.getElementById("downloadBtn") as HTMLButtonElement;
+const errorEl = document.getElementById("error") as HTMLElement;
 
-let lastKml = null;
+let lastKml: string | null = null;
 let lastName = "track.kml";
 
-function showError(message) {
+function showError(message: string): void {
   errorEl.hidden = !message;
   errorEl.textContent = message || "";
 }
 
-function setStatus(message, canDownload) {
+function setStatus(message: string, canDownload: boolean): void {
   statusEl.hidden = !message;
   statusText.textContent = message || "";
   downloadBtn.hidden = !canDownload;
 }
 
-function baseName(filename) {
+function baseName(filename: string): string {
   return filename.replace(/\.gpx$/i, "") || "track";
 }
 
-async function handleFile(file) {
+async function handleFile(file: File | undefined | null): Promise<void> {
   showError("");
   setStatus("", false);
   lastKml = null;
@@ -33,8 +34,7 @@ async function handleFile(file) {
   if (!file) return;
 
   const looksGpx =
-    /\.gpx$/i.test(file.name) ||
-    /gpx|xml/i.test(file.type || "");
+    /\.gpx$/i.test(file.name) || /gpx|xml/i.test(file.type || "");
 
   if (!looksGpx) {
     showError("Elige un archivo con extensión .gpx");
@@ -54,16 +54,20 @@ async function handleFile(file) {
       `${data.pointCount.toLocaleString("es")} puntos`,
       tracks ? `${tracks} track${tracks === 1 ? "" : "s"}` : null,
       routes ? `${routes} ruta${routes === 1 ? "" : "s"}` : null,
-      waypoints ? `${waypoints} waypoint${waypoints === 1 ? "" : "s"}` : null,
+      waypoints
+        ? `${waypoints} waypoint${waypoints === 1 ? "" : "s"}`
+        : null,
     ].filter(Boolean);
 
     setStatus(`${file.name} → ${parts.join(" · ")}`, true);
   } catch (err) {
-    showError(err.message || "No se pudo convertir el archivo");
+    const message =
+      err instanceof Error ? err.message : "No se pudo convertir el archivo";
+    showError(message);
   }
 }
 
-function openPicker() {
+function openPicker(): void {
   fileInput.click();
 }
 
@@ -76,12 +80,12 @@ dropzone.addEventListener("keydown", (e) => {
 });
 
 fileInput.addEventListener("change", () => {
-  const file = fileInput.files && fileInput.files[0];
-  handleFile(file);
+  const file = fileInput.files?.[0];
+  void handleFile(file);
   fileInput.value = "";
 });
 
-["dragenter", "dragover"].forEach((evt) => {
+(["dragenter", "dragover"] as const).forEach((evt) => {
   dropzone.addEventListener(evt, (e) => {
     e.preventDefault();
     e.stopPropagation();
@@ -89,7 +93,7 @@ fileInput.addEventListener("change", () => {
   });
 });
 
-["dragleave", "drop"].forEach((evt) => {
+(["dragleave", "drop"] as const).forEach((evt) => {
   dropzone.addEventListener(evt, (e) => {
     e.preventDefault();
     e.stopPropagation();
@@ -98,8 +102,8 @@ fileInput.addEventListener("change", () => {
 });
 
 dropzone.addEventListener("drop", (e) => {
-  const file = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
-  handleFile(file);
+  const file = e.dataTransfer?.files?.[0];
+  void handleFile(file);
 });
 
 downloadBtn.addEventListener("click", () => {

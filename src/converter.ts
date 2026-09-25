@@ -1,24 +1,56 @@
 /**
- * GPX → KML conversion (browser + Node with a DOMParser implementation).
+ * GPX → KML conversion (browser + optional custom DOMParser).
  */
 
-function localName(el) {
+export interface TrackPoint {
+  lat: number;
+  lon: number;
+  ele: number | null;
+  time: string | null;
+  name: string | null;
+}
+
+export interface Track {
+  name: string;
+  segments: TrackPoint[][];
+}
+
+export interface Route {
+  name: string;
+  points: TrackPoint[];
+}
+
+export interface GpxData {
+  name: string;
+  tracks: Track[];
+  routes: Route[];
+  waypoints: TrackPoint[];
+  pointCount: number;
+}
+
+export type DomParserConstructor = new () => {
+  parseFromString(str: string, type: string): Document;
+};
+
+function localName(el: Element): string {
   return (el.localName || el.nodeName || "").replace(/^.*:/, "").toLowerCase();
 }
 
-function childElements(parent) {
-  return Array.from(parent.childNodes || []).filter((n) => n.nodeType === 1);
+function childElements(parent: ParentNode): Element[] {
+  return Array.from(parent.childNodes).filter(
+    (n): n is Element => n.nodeType === 1
+  );
 }
 
-function findChildren(parent, name) {
+function findChildren(parent: ParentNode, name: string): Element[] {
   const target = name.toLowerCase();
   return childElements(parent).filter((el) => localName(el) === target);
 }
 
-function findDescendants(root, name) {
+function findDescendants(root: ParentNode, name: string): Element[] {
   const target = name.toLowerCase();
-  const results = [];
-  const walk = (node) => {
+  const results: Element[] = [];
+  const walk = (node: ParentNode) => {
     for (const el of childElements(node)) {
       if (localName(el) === target) results.push(el);
       walk(el);
@@ -28,22 +60,21 @@ function findDescendants(root, name) {
   return results;
 }
 
-function textContent(el) {
-  return (el && el.textContent ? el.textContent : "").trim();
+function textOf(el: Element | null | undefined): string {
+  return (el?.textContent ?? "").trim();
 }
 
-function firstChildText(parent, name) {
+function firstChildText(parent: ParentNode, name: string): string {
   const kids = findChildren(parent, name);
-  return kids.length ? textContent(kids[0]) : "";
+  return kids.length ? textOf(kids[0]) : "";
 }
 
-function attr(el, name) {
-  if (!el || !el.getAttribute) return "";
+function attr(el: Element, name: string): string {
   const v = el.getAttribute(name);
   return v == null ? "" : String(v).trim();
 }
 
-function escapeXml(value) {
+function escapeXml(value: string): string {
   return String(value)
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
@@ -52,7 +83,7 @@ function escapeXml(value) {
     .replace(/'/g, "&apos;");
 }
 
-function parsePoint(el) {
+function parsePoint(el: Element): TrackPoint | null {
   const lat = parseFloat(attr(el, "lat"));
   const lon = parseFloat(attr(el, "lon"));
   if (!Number.isFinite(lat) || !Number.isFinite(lon)) return null;
@@ -69,24 +100,24 @@ function parsePoint(el) {
   };
 }
 
-function coordTuple(p) {
+function coordTuple(p: TrackPoint): string {
   if (p.ele != null) return `${p.lon},${p.lat},${p.ele}`;
   return `${p.lon},${p.lat}`;
 }
 
-/**
- * @param {string} xmlText
- * @param {typeof DOMParser} [DOMParserImpl]
- * @returns {{ name: string, tracks: object[], routes: object[], waypoints: object[], pointCount: number }}
- */
-export function parseGpx(xmlText, DOMParserImpl = globalThis.DOMParser) {
+export function parseGpx(
+  xmlText: string,
+  DOMParserImpl: DomParserConstructor = globalThis.DOMParser
+): GpxData {
   if (!DOMParserImpl) {
     throw new Error("DOMParser is not available");
   }
   const doc = new DOMParserImpl().parseFromString(xmlText, "application/xml");
   const parseError = doc.getElementsByTagName("parsererror")[0];
   if (parseError) {
-    throw new Error("Invalid GPX/XML: " + textContent(parseError).slice(0, 200));
+    throw new Error(
+      "Invalid GPX/XML: " + textOf(parseError).slice(0, 200)
+    );
   }
 
   const root =
@@ -101,21 +132,20 @@ export function parseGpx(xmlText, DOMParserImpl = globalThis.DOMParser) {
   const metaName =
     firstChildText(findChildren(root, "metadata")[0] || root, "name") || "";
 
-  const tracks = [];
+  const tracks: Track[] = [];
   for (const trk of findChildren(root, "trk")) {
     const name = firstChildText(trk, "name") || "Track";
-    const segments = [];
+    const segments: TrackPoint[][] = [];
     for (const seg of findChildren(trk, "trkseg")) {
-      const points = [];
+      const points: TrackPoint[] = [];
       for (const pt of findChildren(seg, "trkpt")) {
         const p = parsePoint(pt);
         if (p) points.push(p);
       }
       if (points.length) segments.push(points);
     }
-    // Fall back: trkpt directly under trk
     if (!segments.length) {
-      const points = [];
+      const points: TrackPoint[] = [];
       for (const pt of findChildren(trk, "trkpt")) {
         const p = parsePoint(pt);
         if (p) points.push(p);
@@ -125,10 +155,10 @@ export function parseGpx(xmlText, DOMParserImpl = globalThis.DOMParser) {
     if (segments.length) tracks.push({ name, segments });
   }
 
-  const routes = [];
+  const routes: Route[] = [];
   for (const rte of findChildren(root, "rte")) {
     const name = firstChildText(rte, "name") || "Route";
-    const points = [];
+    const points: TrackPoint[] = [];
     for (const pt of findChildren(rte, "rtept")) {
       const p = parsePoint(pt);
       if (p) points.push(p);
@@ -136,7 +166,7 @@ export function parseGpx(xmlText, DOMParserImpl = globalThis.DOMParser) {
     if (points.length) routes.push({ name, points });
   }
 
-  const waypoints = [];
+  const waypoints: TrackPoint[] = [];
   for (const wpt of findChildren(root, "wpt")) {
     const p = parsePoint(wpt);
     if (p) waypoints.push(p);
@@ -159,12 +189,8 @@ export function parseGpx(xmlText, DOMParserImpl = globalThis.DOMParser) {
   };
 }
 
-/**
- * @param {ReturnType<typeof parseGpx>} data
- * @returns {string}
- */
-export function buildKml(data) {
-  const placemarks = [];
+export function buildKml(data: GpxData): string {
+  const placemarks: string[] = [];
 
   for (const trk of data.tracks) {
     trk.segments.forEach((seg, idx) => {
@@ -231,12 +257,10 @@ ${placemarks.join("\n")}
 `;
 }
 
-/**
- * @param {string} xmlText
- * @param {typeof DOMParser} [DOMParserImpl]
- * @returns {{ kml: string, data: ReturnType<typeof parseGpx> }}
- */
-export function gpxToKml(xmlText, DOMParserImpl = globalThis.DOMParser) {
+export function gpxToKml(
+  xmlText: string,
+  DOMParserImpl: DomParserConstructor = globalThis.DOMParser
+): { kml: string; data: GpxData } {
   const data = parseGpx(xmlText, DOMParserImpl);
   const kml = buildKml(data);
   return { kml, data };
