@@ -27,8 +27,14 @@ import {
 } from "./stats";
 import "./styles.css";
 
+const EXAMPLE_GPX_PATH = `${import.meta.env.BASE_URL}examples/temucoCity-llaimaVolcano.gpx`;
+const EXAMPLE_GPX_NAME = "temucoCity-llaimaVolcano.gpx";
+
 const dropzone = document.getElementById("dropzone") as HTMLElement;
 const fileInput = document.getElementById("fileInput") as HTMLInputElement;
+const loadExampleBtn = document.getElementById(
+  "loadExample",
+) as HTMLButtonElement;
 const resultsEl = document.getElementById("results") as HTMLElement;
 const inputStatsEl = document.getElementById("inputStats") as HTMLElement;
 const outputStatsEl = document.getElementById("outputStats") as HTMLElement;
@@ -266,6 +272,37 @@ fileInput.addEventListener("change", () => {
 dropzone.addEventListener("drop", (e) => {
   const file = e.dataTransfer?.files?.[0];
   void handleFile(file);
+});
+
+async function loadExampleTrack(): Promise<void> {
+  if (loadExampleBtn.disabled) return;
+
+  loadExampleBtn.disabled = true;
+  loadExampleBtn.classList.add("is-loading");
+  showError("");
+
+  try {
+    const response = await fetch(EXAMPLE_GPX_PATH);
+    if (!response.ok) {
+      throw new Error(`Could not load sample track (${response.status})`);
+    }
+    const blob = await response.blob();
+    const file = new File([blob], EXAMPLE_GPX_NAME, {
+      type: "application/gpx+xml",
+    });
+    await handleFile(file);
+  } catch (err) {
+    const message =
+      err instanceof Error ? err.message : "Could not load the sample track";
+    showError(message);
+  } finally {
+    loadExampleBtn.disabled = false;
+    loadExampleBtn.classList.remove("is-loading");
+  }
+}
+
+loadExampleBtn.addEventListener("click", () => {
+  void loadExampleTrack();
 });
 
 downloadBtn.addEventListener("click", () => {

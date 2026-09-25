@@ -7,7 +7,7 @@ Convert GPX files to KML in your browser. No server: the file never leaves your 
 ## Usage
 
 1. Open [https://miguelcarrascoq.github.io/gpx-to-kml/](https://miguelcarrascoq.github.io/gpx-to-kml/)
-2. Drop a `.gpx` file or pick one with the file chooser
+2. Drop a `.gpx` file, pick one with the file chooser, or try the sample track (Temuco → Llaima) from `public/examples/`
 3. Review track stats, the map preview, and the elevation profile
 4. Download the generated `.kml`
 

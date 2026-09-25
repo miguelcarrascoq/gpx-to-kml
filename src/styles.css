@@ -229,6 +229,61 @@ body {
   position: relative;
 }
 
+.example-cta {
+  margin: -0.35rem 0 0;
+  color: var(--muted);
+  font-size: 0.9rem;
+  line-height: 1.45;
+  animation: rise-in 0.75s var(--ease-out) 0.14s both;
+}
+
+.example-link {
+  appearance: none;
+  display: inline;
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: none;
+  font: inherit;
+  font-weight: 600;
+  color: var(--accent-deep);
+  text-decoration: underline;
+  text-decoration-thickness: 1.5px;
+  text-underline-offset: 0.18em;
+  cursor: pointer;
+  transition: color 0.15s ease;
+}
+
+.example-link:hover,
+.example-link:focus-visible {
+  color: var(--accent);
+  outline: none;
+}
+
+.example-link:focus-visible {
+  border-radius: 3px;
+  box-shadow: 0 0 0 2px var(--accent-soft);
+}
+
+.example-link:disabled {
+  cursor: wait;
+  opacity: 0.7;
+}
+
+.example-link.is-loading::after {
+  content: "…";
+}
+
+.example-meta {
+  font-weight: 500;
+  color: var(--muted);
+}
+
+.example-meta::before {
+  content: " · ";
+  font-weight: 400;
+}
+
 .results {
   animation: rise-in 0.55s var(--ease-out) both;
 }
@@ -746,6 +801,11 @@ body {
     font-size: 0.82rem;
   }
 
+  .example-cta {
+    margin-top: -0.15rem;
+    font-size: 0.78rem;
+  }
+
   .file-stats {
     gap: 0.7rem;
   }
@@ -894,6 +954,7 @@ body {
 @media (prefers-reduced-motion: reduce) {
   .hero,
   .dropzone,
+  .example-cta,
   .results,
   .map-wrap,
   .elevation,
@@ -903,7 +964,8 @@ body {
   }
 
   .dropzone,
-  .btn {
+  .btn,
+  .example-link {
     transition: none;
   }
 
