@@ -37,7 +37,7 @@ async function handleFile(file: File | undefined | null): Promise<void> {
     /\.gpx$/i.test(file.name) || /gpx|xml/i.test(file.type || "");
 
   if (!looksGpx) {
-    showError("Elige un archivo con extensión .gpx");
+    showError("Choose a file with a .gpx extension");
     return;
   }
 
@@ -51,9 +51,9 @@ async function handleFile(file: File | undefined | null): Promise<void> {
     const routes = data.routes.length;
     const waypoints = data.waypoints.length;
     const parts = [
-      `${data.pointCount.toLocaleString("es")} puntos`,
+      `${data.pointCount.toLocaleString("en")} points`,
       tracks ? `${tracks} track${tracks === 1 ? "" : "s"}` : null,
-      routes ? `${routes} ruta${routes === 1 ? "" : "s"}` : null,
+      routes ? `${routes} route${routes === 1 ? "" : "s"}` : null,
       waypoints
         ? `${waypoints} waypoint${waypoints === 1 ? "" : "s"}`
         : null,
@@ -62,7 +62,7 @@ async function handleFile(file: File | undefined | null): Promise<void> {
     setStatus(`${file.name} → ${parts.join(" · ")}`, true);
   } catch (err) {
     const message =
-      err instanceof Error ? err.message : "No se pudo convertir el archivo";
+      err instanceof Error ? err.message : "Could not convert the file";
     showError(message);
   }
 }

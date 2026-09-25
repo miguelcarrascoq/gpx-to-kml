@@ -1,12 +1,12 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>GPX → KML</title>
     <meta
       name="description"
-      content="Convierte archivos GPX a KML en el navegador. Ideal para tracks de Insta360 y GPS."
+      content="Convert GPX files to KML in your browser. Works with Insta360 and other GPS tracks."
     />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -20,10 +20,10 @@
     <main class="shell">
       <header class="hero">
         <p class="brand">GPX → KML</p>
-        <h1>Convierte tu track GPS a KML</h1>
+        <h1>Convert your GPS track to KML</h1>
         <p class="lede">
-          Arrastra un archivo <code>.gpx</code> (Insta360, Garmin, etc.). La
-          conversión ocurre solo en tu navegador; nada se sube a un servidor.
+          Drop a <code>.gpx</code> file (Insta360, Garmin, and more). Conversion
+          runs entirely in your browser; nothing is uploaded to a server.
         </p>
       </header>
 
@@ -32,7 +32,7 @@
         id="dropzone"
         tabindex="0"
         role="button"
-        aria-label="Seleccionar o soltar archivo GPX"
+        aria-label="Select or drop a GPX file"
       >
         <input
           type="file"
@@ -40,14 +40,14 @@
           accept=".gpx,application/gpx+xml,text/xml,application/xml"
           hidden
         />
-        <p class="drop-title">Suelta tu GPX aquí</p>
-        <p class="drop-hint">o haz clic para elegir un archivo</p>
+        <p class="drop-title">Drop your GPX here</p>
+        <p class="drop-hint">or click to choose a file</p>
       </section>
 
       <section class="status" id="status" hidden>
         <p id="statusText"></p>
         <button type="button" class="btn" id="downloadBtn" hidden>
-          Descargar KML
+          Download KML
         </button>
       </section>
 
