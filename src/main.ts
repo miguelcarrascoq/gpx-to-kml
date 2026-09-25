@@ -1,4 +1,5 @@
 import { gpxToKml } from "./converter";
+import { clearPreview, showPreview } from "./map";
 import "./styles.css";
 
 const dropzone = document.getElementById("dropzone") as HTMLElement;
@@ -7,6 +8,7 @@ const statusEl = document.getElementById("status") as HTMLElement;
 const statusText = document.getElementById("statusText") as HTMLElement;
 const downloadBtn = document.getElementById("downloadBtn") as HTMLButtonElement;
 const errorEl = document.getElementById("error") as HTMLElement;
+const mapEl = document.getElementById("map") as HTMLElement;
 
 let lastKml: string | null = null;
 let lastName = "track.kml";
@@ -29,6 +31,7 @@ function baseName(filename: string): string {
 async function handleFile(file: File | undefined | null): Promise<void> {
   showError("");
   setStatus("", false);
+  clearPreview(mapEl);
   lastKml = null;
 
   if (!file) return;
@@ -60,6 +63,7 @@ async function handleFile(file: File | undefined | null): Promise<void> {
     ].filter(Boolean);
 
     setStatus(`${file.name} → ${parts.join(" · ")}`, true);
+    showPreview(mapEl, data);
   } catch (err) {
     const message =
       err instanceof Error ? err.message : "Could not convert the file";

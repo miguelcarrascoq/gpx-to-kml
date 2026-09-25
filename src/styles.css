@@ -168,6 +168,23 @@ body {
   transform: translateY(1px);
 }
 
+.map {
+  margin-top: 1.25rem;
+  height: min(360px, 55vh);
+  width: 100%;
+  border-radius: var(--radius);
+  overflow: hidden;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.7);
+  z-index: 0;
+}
+
+.map .leaflet-container {
+  width: 100%;
+  height: 100%;
+  font: inherit;
+}
+
 .error {
   margin-top: 1rem;
   color: var(--danger);
