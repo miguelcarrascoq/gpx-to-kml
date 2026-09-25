@@ -2,6 +2,8 @@
 
 Convert GPX files to KML in your browser. No server: the file never leaves your device.
 
+![GPX to KML main screen](docs/main-screen.png)
+
 ## Usage
 
 1. Open [https://miguelcarrascoq.github.io/gpx-to-kml/](https://miguelcarrascoq.github.io/gpx-to-kml/)
