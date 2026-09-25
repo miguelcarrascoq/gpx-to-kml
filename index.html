@@ -71,12 +71,84 @@
 
         <div class="preview" id="preview">
           <div
-            id="map"
-            class="map"
+            class="map-wrap"
+            id="mapWrap"
             hidden
-            role="region"
-            aria-label="Track map preview"
-          ></div>
+          >
+            <div
+              id="map"
+              class="map"
+              role="region"
+              aria-label="Track map preview"
+            ></div>
+            <div
+              class="track-color"
+              id="trackColor"
+              role="group"
+              aria-label="Track color"
+            >
+              <span class="track-color-label">Track color</span>
+              <div class="track-color-swatches">
+                <button
+                  type="button"
+                  class="track-swatch is-active"
+                  data-color="#0d6e56"
+                  style="--swatch:#0d6e56"
+                  aria-label="Green"
+                  aria-pressed="true"
+                ></button>
+                <button
+                  type="button"
+                  class="track-swatch"
+                  data-color="#c45c26"
+                  style="--swatch:#c45c26"
+                  aria-label="Orange"
+                  aria-pressed="false"
+                ></button>
+                <button
+                  type="button"
+                  class="track-swatch"
+                  data-color="#c0267a"
+                  style="--swatch:#c0267a"
+                  aria-label="Magenta"
+                  aria-pressed="false"
+                ></button>
+                <button
+                  type="button"
+                  class="track-swatch"
+                  data-color="#0e7490"
+                  style="--swatch:#0e7490"
+                  aria-label="Cyan"
+                  aria-pressed="false"
+                ></button>
+                <button
+                  type="button"
+                  class="track-swatch"
+                  data-color="#ca8a04"
+                  style="--swatch:#ca8a04"
+                  aria-label="Yellow"
+                  aria-pressed="false"
+                ></button>
+                <button
+                  type="button"
+                  class="track-swatch"
+                  data-color="#f8faf9"
+                  style="--swatch:#f8faf9"
+                  aria-label="White"
+                  aria-pressed="false"
+                ></button>
+                <label class="track-swatch track-swatch-custom">
+                  <span class="visually-hidden">Custom color</span>
+                  <input
+                    type="color"
+                    id="trackColorCustom"
+                    value="#0d6e56"
+                    aria-label="Custom track color"
+                  />
+                </label>
+              </div>
+            </div>
+          </div>
 
           <section class="elevation" id="elevation" hidden>
             <div class="elevation-header">

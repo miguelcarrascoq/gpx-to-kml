@@ -4,8 +4,11 @@ import { ElevationProfile } from "./elevation";
 import {
   clearPreview,
   clearScrubMarker,
+  DEFAULT_TRACK_COLOR,
+  getTrackColor,
   setMapClickHandler,
   setScrubMarker,
+  setTrackColor,
   showPreview,
 } from "./map";
 import {
@@ -33,6 +36,10 @@ const downloadBtn = document.getElementById("downloadBtn") as HTMLButtonElement;
 const errorEl = document.getElementById("error") as HTMLElement;
 const mapEl = document.getElementById("map") as HTMLElement;
 const elevationEl = document.getElementById("elevation") as HTMLElement;
+const trackColorEl = document.getElementById("trackColor") as HTMLElement;
+const trackColorCustom = document.getElementById(
+  "trackColorCustom",
+) as HTMLInputElement;
 
 const elevationProfile = new ElevationProfile(elevationEl);
 
@@ -40,6 +47,43 @@ let lastKml: string | null = null;
 let lastName = "track.kml";
 let lastData: GpxData | null = null;
 let lastSamples: ProfileSample[] = [];
+
+function normalizeHex(color: string): string {
+  return color.trim().toLowerCase();
+}
+
+function syncTrackColorUI(color: string): void {
+  const hex = normalizeHex(color);
+  trackColorCustom.value = hex;
+  for (const btn of trackColorEl.querySelectorAll<HTMLButtonElement>(
+    ".track-swatch[data-color]",
+  )) {
+    const active = normalizeHex(btn.dataset.color || "") === hex;
+    btn.classList.toggle("is-active", active);
+    btn.setAttribute("aria-pressed", active ? "true" : "false");
+  }
+}
+
+function applyTrackColor(color: string): void {
+  const hex = normalizeHex(color);
+  if (!/^#[0-9a-f]{6}$/.test(hex)) return;
+  setTrackColor(hex);
+  syncTrackColorUI(getTrackColor());
+}
+
+trackColorEl.addEventListener("click", (e) => {
+  const btn = (e.target as HTMLElement).closest<HTMLButtonElement>(
+    ".track-swatch[data-color]",
+  );
+  if (!btn?.dataset.color) return;
+  applyTrackColor(btn.dataset.color);
+});
+
+trackColorCustom.addEventListener("input", () => {
+  applyTrackColor(trackColorCustom.value);
+});
+
+syncTrackColorUI(DEFAULT_TRACK_COLOR);
 
 function showError(message: string): void {
   errorEl.hidden = !message;

@@ -10,7 +10,10 @@ import type {
 import "leaflet/dist/leaflet.css";
 import type { GpxData, TrackPoint } from "./converter";
 
-const TRACK_COLOR = "#0d6e56";
+export const DEFAULT_TRACK_COLOR = "#0d6e56";
+const CASING_COLOR = "#ffffff";
+const CASING_WEIGHT = 8;
+const LINE_WEIGHT = 4;
 const ROUTE_COLOR = "#1a6f9b";
 const SCRUB_COLOR = "#c45c26";
 
@@ -42,6 +45,9 @@ let overlay: LayerGroup | null = null;
 let scrubMarker: CircleMarker | null = null;
 let mapClickHandler: MapClickHandler | null = null;
 let sizeObserver: ResizeObserver | null = null;
+let trackColor = DEFAULT_TRACK_COLOR;
+let lastPreviewData: GpxData | null = null;
+let lastPreviewContainer: HTMLElement | null = null;
 
 function ensureMap(container: HTMLElement): LeafletMap {
   if (map) return map;
@@ -117,6 +123,105 @@ function toLatLngs(points: TrackPoint[]): LatLngExpression[] {
   return points.map((p) => [p.lat, p.lon]);
 }
 
+function darkenHex(hex: string, amount = 0.22): string {
+  const raw = hex.replace("#", "");
+  if (raw.length !== 6) return hex;
+  const n = parseInt(raw, 16);
+  const r = Math.max(0, Math.round(((n >> 16) & 0xff) * (1 - amount)));
+  const g = Math.max(0, Math.round(((n >> 8) & 0xff) * (1 - amount)));
+  const b = Math.max(0, Math.round((n & 0xff) * (1 - amount)));
+  return `#${((r << 16) | (g << 8) | b).toString(16).padStart(6, "0")}`;
+}
+
+function relativeLuminance(hex: string): number {
+  const raw = hex.replace("#", "");
+  if (raw.length !== 6) return 0;
+  const n = parseInt(raw, 16);
+  const r = (n >> 16) & 0xff;
+  const g = (n >> 8) & 0xff;
+  const b = n & 0xff;
+  return (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+}
+
+function casingFor(color: string): string {
+  return relativeLuminance(color) > 0.72 ? "#1c2421" : CASING_COLOR;
+}
+
+function addCasedLine(
+  latlngs: LatLngExpression[],
+  color: string,
+  dashArray?: string,
+): L.LatLngBounds {
+  const casing = L.polyline(latlngs, {
+    color: casingFor(color),
+    weight: CASING_WEIGHT,
+    opacity: 0.95,
+    lineCap: "round",
+    lineJoin: "round",
+    ...(dashArray ? { dashArray } : {}),
+  });
+  const line = L.polyline(latlngs, {
+    color,
+    weight: LINE_WEIGHT,
+    opacity: 0.95,
+    lineCap: "round",
+    lineJoin: "round",
+    ...(dashArray ? { dashArray } : {}),
+  });
+  overlay?.addLayer(casing);
+  overlay?.addLayer(line);
+  return line.getBounds();
+}
+
+function drawOverlay(data: GpxData): L.LatLngBounds {
+  overlay?.clearLayers();
+  const bounds = L.latLngBounds([]);
+
+  for (const trk of data.tracks) {
+    for (const seg of trk.segments) {
+      if (seg.length < 2) continue;
+      bounds.extend(addCasedLine(toLatLngs(seg), trackColor));
+    }
+  }
+
+  for (const rte of data.routes) {
+    if (rte.points.length < 2) continue;
+    bounds.extend(
+      addCasedLine(toLatLngs(rte.points), ROUTE_COLOR, "8 6"),
+    );
+  }
+
+  for (const wpt of data.waypoints) {
+    const marker = L.circleMarker([wpt.lat, wpt.lon], {
+      radius: 6,
+      color: darkenHex(trackColor),
+      fillColor: trackColor,
+      fillOpacity: 0.95,
+      weight: 2,
+    });
+    if (wpt.name) marker.bindPopup(wpt.name);
+    overlay?.addLayer(marker);
+    bounds.extend([wpt.lat, wpt.lon]);
+  }
+
+  return bounds;
+}
+
+export function getTrackColor(): string {
+  return trackColor;
+}
+
+export function setTrackColor(color: string): void {
+  const next = color.trim().toLowerCase();
+  if (!/^#[0-9a-f]{6}$/.test(next)) return;
+  if (next === trackColor) return;
+  trackColor = next;
+  if (!lastPreviewData || !lastPreviewContainer) return;
+  const wrap = lastPreviewContainer.closest(".map-wrap") as HTMLElement | null;
+  const hidden = wrap ? wrap.hidden : lastPreviewContainer.hidden;
+  if (!hidden) drawOverlay(lastPreviewData);
+}
+
 export function setMapClickHandler(handler: MapClickHandler | null): void {
   mapClickHandler = handler;
 }
@@ -144,58 +249,29 @@ export function setScrubMarker(lat: number, lon: number): void {
   }
 }
 
+function setPreviewVisible(container: HTMLElement, visible: boolean): void {
+  const wrap = container.closest(".map-wrap") as HTMLElement | null;
+  if (wrap) wrap.hidden = !visible;
+  else container.hidden = !visible;
+}
+
 export function clearPreview(container: HTMLElement): void {
-  container.hidden = true;
+  setPreviewVisible(container, false);
   clearScrubMarker();
   overlay?.clearLayers();
   mapClickHandler = null;
+  lastPreviewData = null;
+  lastPreviewContainer = null;
 }
 
 export function showPreview(container: HTMLElement, data: GpxData): void {
-  container.hidden = false;
+  setPreviewVisible(container, true);
   const leafletMap = ensureMap(container);
   clearScrubMarker();
-  overlay?.clearLayers();
+  lastPreviewData = data;
+  lastPreviewContainer = container;
 
-  const bounds = L.latLngBounds([]);
-
-  for (const trk of data.tracks) {
-    for (const seg of trk.segments) {
-      if (seg.length < 2) continue;
-      const line = L.polyline(toLatLngs(seg), {
-        color: TRACK_COLOR,
-        weight: 4,
-        opacity: 0.9,
-      });
-      overlay?.addLayer(line);
-      bounds.extend(line.getBounds());
-    }
-  }
-
-  for (const rte of data.routes) {
-    if (rte.points.length < 2) continue;
-    const line = L.polyline(toLatLngs(rte.points), {
-      color: ROUTE_COLOR,
-      weight: 4,
-      opacity: 0.9,
-      dashArray: "8 6",
-    });
-    overlay?.addLayer(line);
-    bounds.extend(line.getBounds());
-  }
-
-  for (const wpt of data.waypoints) {
-    const marker = L.circleMarker([wpt.lat, wpt.lon], {
-      radius: 6,
-      color: "#085241",
-      fillColor: "#0d6e56",
-      fillOpacity: 0.95,
-      weight: 2,
-    });
-    if (wpt.name) marker.bindPopup(wpt.name);
-    overlay?.addLayer(marker);
-    bounds.extend([wpt.lat, wpt.lon]);
-  }
+  const bounds = drawOverlay(data);
 
   const fit = () => {
     leafletMap.invalidateSize();
