@@ -127,10 +127,15 @@ export function showPreview(container: HTMLElement, data: GpxData): void {
     bounds.extend([wpt.lat, wpt.lon]);
   }
 
-  requestAnimationFrame(() => {
+  const fit = () => {
     leafletMap.invalidateSize();
     if (bounds.isValid()) {
       leafletMap.fitBounds(bounds, { padding: [28, 28], maxZoom: 16 });
     }
+  };
+  requestAnimationFrame(() => {
+    fit();
+    // Second pass after desktop grid / flex layout settles
+    requestAnimationFrame(fit);
   });
 }

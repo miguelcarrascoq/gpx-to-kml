@@ -12,7 +12,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,600;0,9..40,700;1,9..40,400&family=Fraunces:opsz,wght@9..144,600;9..144,700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Fraunces:opsz,wght@9..144,600;9..144,700&display=swap"
       rel="stylesheet"
     />
   </head>
@@ -28,82 +28,90 @@
         </p>
       </header>
 
-      <section
-        class="dropzone"
-        id="dropzone"
-        tabindex="0"
-        role="button"
-        aria-label="Select or drop a GPX file"
-      >
-        <input
-          type="file"
-          id="fileInput"
-          accept=".gpx,application/gpx+xml,text/xml,application/xml"
-          hidden
-        />
-        <p class="drop-title">Drop your GPX here</p>
-        <p class="drop-hint">or click to choose a file</p>
-      </section>
+      <div class="workspace">
+        <div class="panel">
+          <section
+            class="dropzone"
+            id="dropzone"
+            tabindex="0"
+            role="button"
+            aria-label="Select or drop a GPX file"
+          >
+            <input
+              type="file"
+              id="fileInput"
+              accept=".gpx,application/gpx+xml,text/xml,application/xml"
+              hidden
+            />
+            <span class="drop-glyph" aria-hidden="true"></span>
+            <p class="drop-title">Drop your GPX here</p>
+            <p class="drop-hint">or click to choose a file</p>
+          </section>
 
-      <section class="results" id="results" hidden>
-        <div class="file-stats" id="fileStats">
-          <div class="meta-block">
-            <h2 class="meta-heading">Incoming GPX</h2>
-            <dl class="meta-grid" id="inputStats"></dl>
-          </div>
-          <div class="meta-block">
-            <h2 class="meta-heading">Outgoing KML</h2>
-            <dl class="meta-grid" id="outputStats"></dl>
-          </div>
-        </div>
-        <div class="status" id="status">
-          <button type="button" class="btn" id="downloadBtn">
-            Download KML
-          </button>
-        </div>
-      </section>
-
-      <div
-        id="map"
-        class="map"
-        hidden
-        role="region"
-        aria-label="Track map preview"
-      ></div>
-
-      <section class="elevation" id="elevation" hidden>
-        <div class="elevation-header">
-          <h2 class="meta-heading">Elevation</h2>
-          <div class="elevation-readouts" aria-live="polite">
-            <div class="readout">
-              <span class="readout-label">Distance</span>
-              <span class="readout-value" data-readout-distance>—</span>
+          <section class="results" id="results" hidden>
+            <div class="file-stats" id="fileStats">
+              <div class="meta-block">
+                <h2 class="meta-heading">Incoming GPX</h2>
+                <dl class="meta-grid" id="inputStats"></dl>
+              </div>
+              <div class="meta-block">
+                <h2 class="meta-heading">Outgoing KML</h2>
+                <dl class="meta-grid" id="outputStats"></dl>
+              </div>
             </div>
-            <div class="readout">
-              <span class="readout-label">Altitude</span>
-              <span class="readout-value" data-readout-elevation>—</span>
+            <div class="status" id="status">
+              <button type="button" class="btn" id="downloadBtn">
+                Download KML
+              </button>
             </div>
-            <div class="readout">
-              <span class="readout-label">Time</span>
-              <span class="readout-value" data-readout-time>—</span>
-            </div>
-          </div>
-        </div>
-        <p class="elevation-empty" data-elevation-empty hidden>
-          No elevation data in this file. Scrubbing the map is unavailable.
-        </p>
-        <div
-          class="elevation-chart"
-          data-elevation-chart
-          role="region"
-          aria-label="Elevation profile"
-        ></div>
-        <p class="elevation-hint">
-          Drag the profile or click the map to pick a position along the track.
-        </p>
-      </section>
+          </section>
 
-      <p class="error" id="error" hidden></p>
+          <p class="error" id="error" hidden></p>
+        </div>
+
+        <div class="preview" id="preview">
+          <div
+            id="map"
+            class="map"
+            hidden
+            role="region"
+            aria-label="Track map preview"
+          ></div>
+
+          <section class="elevation" id="elevation" hidden>
+            <div class="elevation-header">
+              <h2 class="meta-heading">Elevation</h2>
+              <div class="elevation-readouts" aria-live="polite">
+                <div class="readout">
+                  <span class="readout-label">Distance</span>
+                  <span class="readout-value" data-readout-distance>—</span>
+                </div>
+                <div class="readout">
+                  <span class="readout-label">Altitude</span>
+                  <span class="readout-value" data-readout-elevation>—</span>
+                </div>
+                <div class="readout">
+                  <span class="readout-label">Time</span>
+                  <span class="readout-value" data-readout-time>—</span>
+                </div>
+              </div>
+            </div>
+            <p class="elevation-empty" data-elevation-empty hidden>
+              No elevation data in this file. Scrubbing the map is unavailable.
+            </p>
+            <div
+              class="elevation-chart"
+              data-elevation-chart
+              role="region"
+              aria-label="Elevation profile"
+            ></div>
+            <p class="elevation-hint">
+              Drag the profile or click the map to pick a position along the
+              track.
+            </p>
+          </section>
+        </div>
+      </div>
     </main>
 
     <script type="module" src="./src/main.ts"></script>

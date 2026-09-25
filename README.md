@@ -6,9 +6,10 @@ Convert GPX files to KML in your browser. No server: the file never leaves your 
 
 1. Open [https://miguelcarrascoq.github.io/gpx-to-kml/](https://miguelcarrascoq.github.io/gpx-to-kml/)
 2. Drop a `.gpx` file or pick one with the file chooser
-3. Download the generated `.kml`
+3. Review track stats, the map preview, and the elevation profile
+4. Download the generated `.kml`
 
-Works with Insta360 Studio, Garmin, and other GPX 1.0/1.1 exporters (tracks, routes, and waypoints). After loading a file, an interactive OpenStreetMap preview shows the track (no API key required).
+Works with Insta360 Studio, Garmin, and other GPX 1.0/1.1 exporters (tracks, routes, and waypoints). After loading a file, an interactive OpenStreetMap preview and elevation scrubber show the track (no API key required).
 
 ## Local development
 

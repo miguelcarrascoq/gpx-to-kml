@@ -4,11 +4,15 @@
   --paper: #f3f6f2;
   --accent: #0d6e56;
   --accent-deep: #085241;
+  --accent-soft: rgba(13, 110, 86, 0.1);
+  --clay: #c45c26;
   --line: rgba(28, 36, 33, 0.14);
+  --glass: rgba(255, 255, 255, 0.62);
   --danger: #9b2c2c;
-  --radius: 14px;
+  --radius: 16px;
   --font-display: "Fraunces", Georgia, serif;
   --font-body: "DM Sans", "Segoe UI", sans-serif;
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 *,
@@ -28,6 +32,7 @@ body {
   color: var(--ink);
   background: var(--paper);
   line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
 }
 
 .bg {
@@ -35,115 +40,196 @@ body {
   inset: 0;
   z-index: -1;
   background:
-    radial-gradient(ellipse 80% 50% at 10% -10%, #c8e6d8 0%, transparent 55%),
-    radial-gradient(ellipse 70% 45% at 100% 0%, #dce8f0 0%, transparent 50%),
-    linear-gradient(165deg, #eef3ee 0%, #e4ebe4 45%, #dfe8e3 100%);
+    radial-gradient(ellipse 70% 48% at 8% -8%, #bfe0d0 0%, transparent 55%),
+    radial-gradient(ellipse 55% 40% at 96% 4%, #c9dae8 0%, transparent 48%),
+    radial-gradient(ellipse 45% 35% at 70% 100%, #d8e6c8 0%, transparent 50%),
+    linear-gradient(165deg, #eef3ee 0%, #e4ebe4 45%, #d8e4de 100%);
 }
 
 .bg::after {
   content: "";
   position: absolute;
   inset: 0;
-  opacity: 0.35;
+  opacity: 0.32;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120' viewBox='0 0 120 120'%3E%3Cpath fill='none' stroke='%231c2421' stroke-opacity='0.06' d='M0 60h120M60 0v120'/%3E%3C/svg%3E");
 }
 
 .shell {
-  width: min(640px, calc(100% - 2rem));
+  width: min(1120px, calc(100% - 2rem));
   margin: 0 auto;
-  padding: clamp(2.5rem, 8vw, 4.5rem) 0 3rem;
+  padding: clamp(2rem, 6vw, 3.75rem) 0 clamp(2.5rem, 6vw, 4rem);
 }
 
 .hero {
-  margin-bottom: 1.75rem;
+  margin-bottom: clamp(1.5rem, 3vw, 2.25rem);
+  max-width: 40rem;
+  animation: rise-in 0.7s var(--ease-out) both;
 }
 
 .brand {
-  margin: 0 0 0.65rem;
+  margin: 0 0 0.55rem;
   font-family: var(--font-display);
-  font-size: clamp(2rem, 6vw, 2.75rem);
+  font-size: clamp(2.35rem, 5.5vw, 3.35rem);
   font-weight: 700;
-  letter-spacing: -0.03em;
-  line-height: 1.05;
+  letter-spacing: -0.035em;
+  line-height: 1.02;
   color: var(--accent-deep);
 }
 
 .hero h1 {
-  margin: 0 0 0.75rem;
+  margin: 0 0 0.7rem;
   font-family: var(--font-body);
-  font-size: clamp(1.15rem, 2.8vw, 1.35rem);
+  font-size: clamp(1.12rem, 2.2vw, 1.32rem);
   font-weight: 600;
-  letter-spacing: -0.01em;
+  letter-spacing: -0.015em;
 }
 
 .lede {
   margin: 0;
   color: var(--muted);
-  font-size: 1.02rem;
+  font-size: 1.04rem;
   max-width: 36em;
 }
 
 .lede code {
   font-size: 0.92em;
-  padding: 0.1em 0.35em;
-  border-radius: 4px;
-  background: rgba(13, 110, 86, 0.1);
+  padding: 0.12em 0.4em;
+  border-radius: 5px;
+  background: var(--accent-soft);
+  color: var(--accent-deep);
+}
+
+.workspace {
+  display: grid;
+  gap: 1.35rem;
+  align-items: start;
+}
+
+.panel {
+  display: flex;
+  flex-direction: column;
+  gap: 1.15rem;
+  min-width: 0;
+}
+
+.preview {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  min-width: 0;
+}
+
+.preview:not(:has(.map:not([hidden]))) {
+  display: none;
 }
 
 .dropzone {
+  position: relative;
   display: grid;
   place-items: center;
-  gap: 0.35rem;
-  min-height: 11rem;
-  padding: 1.5rem;
+  gap: 0.3rem;
+  min-height: 11.5rem;
+  padding: 1.75rem 1.5rem;
   border: 1.5px dashed var(--line);
   border-radius: var(--radius);
-  background: rgba(255, 255, 255, 0.55);
+  background: var(--glass);
+  backdrop-filter: blur(8px);
   cursor: pointer;
+  overflow: hidden;
   transition:
-    border-color 0.2s ease,
-    background 0.2s ease,
-    transform 0.2s ease;
+    border-color 0.25s var(--ease-out),
+    background 0.25s var(--ease-out),
+    transform 0.25s var(--ease-out),
+    box-shadow 0.25s var(--ease-out);
+  animation: rise-in 0.75s var(--ease-out) 0.08s both;
+}
+
+.dropzone::before {
+  content: "";
+  position: absolute;
+  inset: auto -20% -40% -20%;
+  height: 70%;
+  background: radial-gradient(
+    ellipse at center,
+    rgba(13, 110, 86, 0.12),
+    transparent 70%
+  );
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+  opacity: 0.7;
 }
 
 .dropzone:hover,
 .dropzone:focus-visible {
   outline: none;
   border-color: var(--accent);
-  background: rgba(255, 255, 255, 0.8);
+  background: rgba(255, 255, 255, 0.82);
+  box-shadow: 0 12px 36px rgba(8, 82, 65, 0.08);
+}
+
+.dropzone:hover::before,
+.dropzone:focus-visible::before {
+  opacity: 1;
 }
 
 .dropzone.dragover {
   border-color: var(--accent);
-  background: rgba(13, 110, 86, 0.08);
-  transform: scale(1.01);
+  background: rgba(13, 110, 86, 0.1);
+  transform: scale(1.012);
+  box-shadow: 0 16px 40px rgba(8, 82, 65, 0.12);
+}
+
+.drop-glyph {
+  width: 2.4rem;
+  height: 2.4rem;
+  margin-bottom: 0.35rem;
+  border-radius: 50%;
+  background:
+    linear-gradient(145deg, #1a8f6e, var(--accent-deep));
+  box-shadow: 0 6px 16px rgba(8, 82, 65, 0.22);
+  position: relative;
+}
+
+.drop-glyph::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  width: 0.85rem;
+  height: 0.85rem;
+  border-right: 2px solid #fff;
+  border-bottom: 2px solid #fff;
+  transform: translateY(-15%) rotate(45deg);
 }
 
 .drop-title {
   margin: 0;
   font-weight: 700;
-  font-size: 1.1rem;
+  font-size: 1.12rem;
+  letter-spacing: -0.01em;
+  position: relative;
 }
 
 .drop-hint {
   margin: 0;
   color: var(--muted);
   font-size: 0.95rem;
+  position: relative;
 }
 
 .results {
-  margin-top: 1.25rem;
+  animation: rise-in 0.55s var(--ease-out) both;
 }
 
 .file-stats {
   display: grid;
-  gap: 1.25rem;
+  gap: 1.15rem;
 }
 
 @media (min-width: 520px) {
   .file-stats {
     grid-template-columns: 1fr 1fr;
-    gap: 1.5rem;
+    gap: 1.35rem;
   }
 }
 
@@ -154,9 +240,9 @@ body {
 .meta-heading {
   margin: 0 0 0.65rem;
   font-family: var(--font-body);
-  font-size: 0.78rem;
+  font-size: 0.76rem;
   font-weight: 700;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.07em;
   text-transform: uppercase;
   color: var(--accent-deep);
 }
@@ -164,9 +250,9 @@ body {
 .meta-grid {
   display: grid;
   grid-template-columns: auto 1fr;
-  gap: 0.35rem 0.85rem;
+  gap: 0.4rem 0.85rem;
   margin: 0;
-  padding: 0.85rem 0 0;
+  padding: 0.9rem 0 0;
   border-top: 1px solid var(--line);
   font-size: 0.92rem;
 }
@@ -186,7 +272,7 @@ body {
 }
 
 .status {
-  margin-top: 1.15rem;
+  margin-top: 1.2rem;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -197,19 +283,22 @@ body {
   appearance: none;
   border: none;
   border-radius: 999px;
-  padding: 0.7rem 1.35rem;
+  padding: 0.78rem 1.5rem;
   font: inherit;
   font-weight: 600;
   color: #fff;
-  background: var(--accent);
+  background: linear-gradient(160deg, #14906f 0%, var(--accent) 55%, var(--accent-deep));
   cursor: pointer;
+  box-shadow: 0 8px 20px rgba(8, 82, 65, 0.2);
   transition:
-    background 0.15s ease,
-    transform 0.15s ease;
+    filter 0.15s ease,
+    transform 0.15s ease,
+    box-shadow 0.15s ease;
 }
 
 .btn:hover {
-  background: var(--accent-deep);
+  filter: brightness(1.05);
+  box-shadow: 0 10px 24px rgba(8, 82, 65, 0.28);
 }
 
 .btn:active {
@@ -217,14 +306,15 @@ body {
 }
 
 .map {
-  margin-top: 1.25rem;
-  height: min(360px, 55vh);
+  height: min(380px, 52vh);
   width: 100%;
   border-radius: var(--radius);
   overflow: hidden;
   border: 1px solid var(--line);
-  background: rgba(255, 255, 255, 0.7);
+  background: var(--glass);
+  box-shadow: 0 10px 30px rgba(28, 36, 33, 0.06);
   z-index: 0;
+  animation: rise-in 0.6s var(--ease-out) both;
 }
 
 .map .leaflet-container {
@@ -234,7 +324,7 @@ body {
 }
 
 .elevation {
-  margin-top: 1.25rem;
+  animation: rise-in 0.65s var(--ease-out) 0.05s both;
 }
 
 .elevation-header {
@@ -243,7 +333,7 @@ body {
   align-items: baseline;
   justify-content: space-between;
   gap: 0.75rem 1.25rem;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.55rem;
 }
 
 .elevation-header .meta-heading {
@@ -253,7 +343,7 @@ body {
 .elevation-readouts {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.75rem 1.25rem;
+  gap: 0.75rem 1.35rem;
 }
 
 .readout {
@@ -264,9 +354,9 @@ body {
 }
 
 .readout-label {
-  font-size: 0.72rem;
+  font-size: 0.7rem;
   font-weight: 600;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.05em;
   text-transform: uppercase;
   color: var(--muted);
 }
@@ -274,7 +364,7 @@ body {
 .readout-value {
   font-variant-numeric: tabular-nums;
   font-weight: 700;
-  font-size: 0.98rem;
+  font-size: 1rem;
 }
 
 .elevation-empty {
@@ -284,12 +374,14 @@ body {
 }
 
 .elevation-chart {
-  height: 160px;
+  height: 168px;
   width: 100%;
   border-radius: var(--radius);
   border: 1px solid var(--line);
-  background: rgba(255, 255, 255, 0.65);
+  background: var(--glass);
+  backdrop-filter: blur(6px);
   overflow: hidden;
+  box-shadow: 0 8px 24px rgba(28, 36, 33, 0.05);
 }
 
 .elevation-svg {
@@ -312,38 +404,97 @@ body {
 
 .elevation-line {
   stroke: var(--accent);
-  stroke-width: 2.25;
+  stroke-width: 2.35;
   stroke-linejoin: round;
   stroke-linecap: round;
 }
 
+.elevation-area {
+  animation: fade-in 0.8s var(--ease-out) both;
+}
+
 .elevation-cursor {
-  stroke: #c45c26;
+  stroke: var(--clay);
   stroke-width: 1.5;
   stroke-dasharray: 4 3;
   pointer-events: none;
 }
 
 .elevation-dot {
-  fill: #c45c26;
+  fill: var(--clay);
   stroke: #fff;
   stroke-width: 2;
   pointer-events: none;
 }
 
 .elevation-hint {
-  margin: 0.5rem 0 0;
+  margin: 0.55rem 0 0;
   color: var(--muted);
   font-size: 0.85rem;
 }
 
 .error {
-  margin-top: 1rem;
+  margin: 0;
   color: var(--danger);
   font-size: 0.95rem;
+  animation: rise-in 0.4s var(--ease-out) both;
+}
+
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@media (min-width: 960px) {
+  .workspace {
+    grid-template-columns: minmax(280px, 0.95fr) minmax(0, 1.35fr);
+    gap: 1.75rem 2rem;
+  }
+
+  .file-stats {
+    grid-template-columns: 1fr;
+    gap: 1.35rem;
+  }
+
+  .dropzone {
+    min-height: 13rem;
+  }
+
+  .map {
+    height: min(480px, 58vh);
+  }
+
+  .elevation-chart {
+    height: 180px;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .hero,
+  .dropzone,
+  .results,
+  .map,
+  .elevation,
+  .error,
+  .elevation-area {
+    animation: none;
+  }
+
   .dropzone,
   .btn {
     transition: none;
