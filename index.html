@@ -45,11 +45,22 @@
         <p class="drop-hint">or click to choose a file</p>
       </section>
 
-      <section class="status" id="status" hidden>
-        <p id="statusText"></p>
-        <button type="button" class="btn" id="downloadBtn" hidden>
-          Download KML
-        </button>
+      <section class="results" id="results" hidden>
+        <div class="file-stats" id="fileStats">
+          <div class="meta-block">
+            <h2 class="meta-heading">Incoming GPX</h2>
+            <dl class="meta-grid" id="inputStats"></dl>
+          </div>
+          <div class="meta-block">
+            <h2 class="meta-heading">Outgoing KML</h2>
+            <dl class="meta-grid" id="outputStats"></dl>
+          </div>
+        </div>
+        <div class="status" id="status">
+          <button type="button" class="btn" id="downloadBtn">
+            Download KML
+          </button>
+        </div>
       </section>
 
       <div
