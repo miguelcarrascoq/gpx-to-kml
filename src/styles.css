@@ -55,9 +55,9 @@ body {
 }
 
 .shell {
-  width: min(1120px, calc(100% - 2rem));
+  width: min(1480px, calc(100% - 2rem));
   margin: 0 auto;
-  padding: clamp(2rem, 6vw, 3.75rem) 0 clamp(2.5rem, 6vw, 4rem);
+  padding: clamp(1.75rem, 4vw, 3rem) 0 clamp(2.25rem, 5vw, 3.5rem);
 }
 
 .hero {
@@ -306,8 +306,9 @@ body {
 }
 
 .map {
-  height: min(380px, 52vh);
+  height: min(400px, 55vh);
   width: 100%;
+  min-height: 280px;
   border-radius: var(--radius);
   overflow: hidden;
   border: 1px solid var(--line);
@@ -461,26 +462,67 @@ body {
 }
 
 @media (min-width: 960px) {
+  .shell {
+    width: min(1520px, calc(100% - 2.5rem));
+  }
+
   .workspace {
-    grid-template-columns: minmax(280px, 0.95fr) minmax(0, 1.35fr);
-    gap: 1.75rem 2rem;
+    /* Narrow control rail; map + elevation claim the rest of the viewport */
+    grid-template-columns: minmax(260px, 320px) minmax(0, 1fr);
+    gap: 1.5rem 1.75rem;
+    align-items: start;
+  }
+
+  .panel {
+    position: sticky;
+    top: 1rem;
   }
 
   .file-stats {
     grid-template-columns: 1fr;
-    gap: 1.35rem;
+    gap: 1.25rem;
   }
 
   .dropzone {
-    min-height: 13rem;
+    min-height: 10.5rem;
+    padding: 1.35rem 1.15rem;
   }
 
   .map {
-    height: min(480px, 58vh);
+    height: clamp(440px, calc(100vh - 11.5rem), 720px);
   }
 
   .elevation-chart {
-    height: 180px;
+    height: 190px;
+  }
+}
+
+@media (min-width: 1280px) {
+  .shell {
+    width: min(1680px, calc(100% - 3rem));
+  }
+
+  .workspace {
+    grid-template-columns: minmax(280px, 340px) minmax(0, 1fr);
+    gap: 1.75rem 2.25rem;
+  }
+
+  .map {
+    height: clamp(520px, calc(100vh - 10.5rem), 820px);
+  }
+
+  .elevation-chart {
+    height: 200px;
+  }
+}
+
+@media (min-width: 1600px) {
+  .shell {
+    width: min(1800px, calc(100% - 4rem));
+  }
+
+  .map {
+    height: clamp(560px, calc(100vh - 10rem), 880px);
   }
 }
 

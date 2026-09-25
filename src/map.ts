@@ -40,6 +40,10 @@ function ensureMap(container: HTMLElement): LeafletMap {
     mapClickHandler?.(e.latlng.lat, e.latlng.lng);
   });
 
+  window.addEventListener("resize", () => {
+    map?.invalidateSize();
+  });
+
   return map;
 }
 
