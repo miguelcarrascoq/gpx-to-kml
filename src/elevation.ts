@@ -97,10 +97,10 @@ export class ElevationProfile {
   private render(): void {
     if (!this.samples.length) return;
 
-    const width = Math.max(this.chart.clientWidth || 320, 200);
-    const height = Math.max(this.chart.clientHeight || 140, 120);
-    const plotW = width - PAD.left - PAD.right;
-    const plotH = height - PAD.top - PAD.bottom;
+    const width = Math.max(this.chart.clientWidth || 320, 1);
+    const height = Math.max(this.chart.clientHeight || 140, 1);
+    const plotW = Math.max(width - PAD.left - PAD.right, 1);
+    const plotH = Math.max(height - PAD.top - PAD.bottom, 1);
 
     const distMax = this.samples[this.samples.length - 1].distanceM || 1;
     const elevs = this.samples.map((s) => s.ele);
@@ -130,6 +130,7 @@ export class ElevationProfile {
     const svgNS = "http://www.w3.org/2000/svg";
     const svg = document.createElementNS(svgNS, "svg");
     svg.setAttribute("viewBox", `0 0 ${width} ${height}`);
+    svg.setAttribute("preserveAspectRatio", "none");
     svg.setAttribute("width", "100%");
     svg.setAttribute("height", "100%");
     svg.setAttribute("role", "img");
@@ -219,11 +220,12 @@ export class ElevationProfile {
     dot.setAttribute("visibility", "hidden");
     svg.append(dot);
 
+    // Full-width hit so axis margins still scrub to start/end samples.
     const hit = document.createElementNS(svgNS, "rect");
-    hit.setAttribute("x", String(PAD.left));
-    hit.setAttribute("y", String(PAD.top));
-    hit.setAttribute("width", String(plotW));
-    hit.setAttribute("height", String(plotH));
+    hit.setAttribute("x", "0");
+    hit.setAttribute("y", "0");
+    hit.setAttribute("width", String(width));
+    hit.setAttribute("height", String(height));
     hit.setAttribute("fill", "transparent");
     hit.setAttribute("class", "elevation-hit");
     hit.style.cursor = "crosshair";
@@ -235,7 +237,8 @@ export class ElevationProfile {
     this.dot = dot;
 
     const pick = (clientX: number) => {
-      const rect = svg.getBoundingClientRect();
+      const rect = hit.getBoundingClientRect();
+      if (rect.width <= 0) return;
       const scaleX = width / rect.width;
       const x = (clientX - rect.left) * scaleX;
       const ratio = Math.max(0, Math.min(1, (x - PAD.left) / plotW));
@@ -298,8 +301,8 @@ export class ElevationProfile {
 
     const width = this.svg.viewBox.baseVal.width;
     const height = this.svg.viewBox.baseVal.height;
-    const plotW = width - PAD.left - PAD.right;
-    const plotH = height - PAD.top - PAD.bottom;
+    const plotW = Math.max(width - PAD.left - PAD.right, 1);
+    const plotH = Math.max(height - PAD.top - PAD.bottom, 1);
     const distMax = this.samples[this.samples.length - 1].distanceM || 1;
     const elevs = this.samples.map((s) => s.ele);
     let elevMin = Math.min(...elevs);

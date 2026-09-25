@@ -7,6 +7,7 @@ import {
   DEFAULT_TRACK_COLOR,
   getTrackColor,
   setMapClickHandler,
+  setMapHoverHandler,
   setScrubMarker,
   setTrackColor,
   showPreview,
@@ -225,8 +226,10 @@ async function handleFile(file: File | undefined | null): Promise<void> {
     elevationProfile.show(lastSamples);
     if (lastSamples.length) {
       setMapClickHandler(onMapClick);
+      setMapHoverHandler(onMapClick);
     } else {
       setMapClickHandler(null);
+      setMapHoverHandler(null);
     }
   } catch (err) {
     const message =

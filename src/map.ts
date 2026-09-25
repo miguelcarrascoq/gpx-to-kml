@@ -9,6 +9,7 @@ import type {
 } from "leaflet";
 import "leaflet/dist/leaflet.css";
 import type { GpxData, TrackPoint } from "./converter";
+import { flattenPathPoints } from "./stats";
 
 export const DEFAULT_TRACK_COLOR = "#0d6e56";
 const CASING_COLOR = "#ffffff";
@@ -16,6 +17,8 @@ const CASING_WEIGHT = 8;
 const LINE_WEIGHT = 4;
 const ROUTE_COLOR = "#1a6f9b";
 const SCRUB_COLOR = "#c45c26";
+/** Max screen-pixel distance from the track to scrub on hover. */
+const HOVER_HIT_PX = 36;
 
 const OSM_ATTR =
   '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>';
@@ -39,11 +42,14 @@ function esriImageryLayer(): TileLayer {
 }
 
 export type MapClickHandler = (lat: number, lon: number) => void;
+export type MapHoverHandler = (lat: number, lon: number) => void;
 
 let map: LeafletMap | null = null;
 let overlay: LayerGroup | null = null;
 let scrubMarker: CircleMarker | null = null;
 let mapClickHandler: MapClickHandler | null = null;
+let mapHoverHandler: MapHoverHandler | null = null;
+let hoverRaf = 0;
 let sizeObserver: ResizeObserver | null = null;
 let trackColor = DEFAULT_TRACK_COLOR;
 let lastPreviewData: GpxData | null = null;
@@ -105,6 +111,18 @@ function ensureMap(container: HTMLElement): LeafletMap {
 
   map.on("click", (e: LeafletMouseEvent) => {
     mapClickHandler?.(e.latlng.lat, e.latlng.lng);
+  });
+
+  map.on("mousemove", (e: LeafletMouseEvent) => {
+    if (!mapHoverHandler) return;
+    if (hoverRaf) cancelAnimationFrame(hoverRaf);
+    const { lat, lng } = e.latlng;
+    hoverRaf = requestAnimationFrame(() => {
+      hoverRaf = 0;
+      const near = nearestPathLatLngPx(lat, lng);
+      if (!near) return;
+      mapHoverHandler?.(near.lat, near.lon);
+    });
   });
 
   sizeObserver = new ResizeObserver(() => {
@@ -226,6 +244,38 @@ export function setMapClickHandler(handler: MapClickHandler | null): void {
   mapClickHandler = handler;
 }
 
+export function setMapHoverHandler(handler: MapHoverHandler | null): void {
+  mapHoverHandler = handler;
+  if (!handler && hoverRaf) {
+    cancelAnimationFrame(hoverRaf);
+    hoverRaf = 0;
+  }
+}
+
+/** Nearest path point within HOVER_HIT_PX of the cursor, in screen space. */
+function nearestPathLatLngPx(
+  lat: number,
+  lon: number,
+): { lat: number; lon: number } | null {
+  if (!map || !lastPreviewData) return null;
+  const points = flattenPathPoints(lastPreviewData);
+  if (!points.length) return null;
+
+  const cursor = map.latLngToContainerPoint([lat, lon]);
+  let best: TrackPoint | null = null;
+  let bestD = Infinity;
+  for (const p of points) {
+    const pt = map.latLngToContainerPoint([p.lat, p.lon]);
+    const d = Math.hypot(pt.x - cursor.x, pt.y - cursor.y);
+    if (d < bestD) {
+      bestD = d;
+      best = p;
+    }
+  }
+  if (!best || bestD > HOVER_HIT_PX) return null;
+  return { lat: best.lat, lon: best.lon };
+}
+
 export function clearScrubMarker(): void {
   if (scrubMarker && map) {
     map.removeLayer(scrubMarker);
@@ -260,6 +310,11 @@ export function clearPreview(container: HTMLElement): void {
   clearScrubMarker();
   overlay?.clearLayers();
   mapClickHandler = null;
+  mapHoverHandler = null;
+  if (hoverRaf) {
+    cancelAnimationFrame(hoverRaf);
+    hoverRaf = 0;
+  }
   lastPreviewData = null;
   lastPreviewContainer = null;
 }
